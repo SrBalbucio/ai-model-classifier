@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Model Classifier
 
-## Getting Started
+A private app to catalog AI coding models and rate them across categories, so you
+can remember which ones you actually liked. Local-only, single SQLite file, no
+accounts and no public hosting.
 
-First, run the development server:
+## Stack
+
+- **Next.js 15** (App Router) + **TypeScript**
+- **Tailwind CSS v4**
+- **SQLite** via the built-in `node:sqlite` module (no native dependencies)
+- Data lives in `data/classifier.db` (gitignored)
+
+## Getting started
 
 ```bash
+npm install
+npm run seed   # optional: load 16 popular models from the OpenRouter catalog
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000 (or the port printed in the terminal).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run the production build |
+| `npm run seed` | Seed the DB with a handful of popular models |
+| `npm run lint` | Run ESLint |
 
-## Learn More
+## Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Dashboard** — grid of saved models with logo, provider, average score and a mini radar chart.
+- **Add model** — search the OpenRouter catalog (470+ models with price, context
+  length and Artificial Analysis benchmarks) or create an entry manually.
+- **Model detail** — 1–10 sliders per category, a radar chart profile, external
+  reference data and private free-text notes.
+- **Rankings** — leaderboard per category.
+- **Compare** — two models side by side with overlaid radars and a per-category table.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Categories
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Each model is rated 1–10 on:
 
-## Deploy on Vercel
+| Category | Note |
+| --- | --- |
+| Autonomy | Works through a task without hand-holding |
+| Speed | Feels fast to work with |
+| Reasoning | Logical / multi-step problem solving |
+| Task Completion | Takes a task end-to-end without stalling |
+| Tools / MCP | Tool use and function calling |
+| Context Window | Holds context before losing track |
+| Cost | Higher = cheaper |
+| Hallucinations | Higher = fewer hallucinations |
+| Multilingual | Understands and replies in non-English languages |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To add or rename a category, edit `lib/categories.ts`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## External data
+
+The catalog is fetched from the free [OpenRouter](https://openrouter.ai) models
+API (`/api/v1/models`, no API key needed) and cached for 24 hours. Provider logos
+are resolved from the model id via Google's favicon service, with an
+initials avatar as fallback.
+
+## Notes
+
+- **Corporate proxy / TLS inspection:** `dev`, `build`, `start` and `seed` run with
+  `NODE_OPTIONS=--use-system-ca` so Node trusts the OS certificate store. If your
+  machine doesn't need this, remove the `cross-env NODE_OPTIONS=--use-system-ca`
+  prefix from the scripts in `package.json`.
+- To reset all data, delete `data/` and run `npm run seed` again.
